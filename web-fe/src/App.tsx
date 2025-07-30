@@ -2,10 +2,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Send, Zap, MessageCircle, User, Settings, DollarSign, Github, ExternalLink, Linkedin } from 'lucide-react';
 import { WalletProvider, ConnectionProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import '@solana/wallet-adapter-react-ui/styles.css';
+import { test } from './encryption';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -16,11 +16,12 @@ function App() {
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [lastSent, setLastSent] = useState<string | null>(null);
   const [lastConfigSaved, setLastConfigSaved] = useState<string | null>(null);
-      const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
-	useEffect(() => {
-		setIsClient(true);
-	}, []);
+  useEffect(() => {
+	setIsClient(true);
+	test();
+  }, []);
 
   const [receivedMessages, setReceivedMessages] = useState([
     {
@@ -142,7 +143,7 @@ function App() {
                 Neural Bond
               </h1>
             </div>
-            <p className="text-gray-400 text-sm">Semi-secure Solana messaging protocol by SAFT.Industries <br/> PoC - DEVNET version</p>
+            <p className="text-gray-400 text-sm">Possibly totally unsafe Solana messaging protocol by SAFT.Industries <br/> PoC - DEVNET version</p>
 			<br/>
            {isClient && <WalletMultiButton />}
 

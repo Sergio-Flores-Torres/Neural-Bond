@@ -5,6 +5,10 @@
 ## TLDR
 A Solana on-chain messaging system, encrypted, public and decentralized with the purpose of enabling the users to receive paid messages from the public and eliminate spam.
 
+## Purpose
+
+Street-cred and kicks
+
 ## Rationale
 
 Internet creators need to stay in contact with their audiences to enable business transactions or conduct monetized communications, for example:
@@ -32,11 +36,26 @@ The messages are stored on chain, encrypted end-to-end (because, data on-chain i
 
 So, because we cannot exchange the encryption keys securely, we are relying in public knowledge: We know the public address of the recipient, and the recipient will know the public address of the sender, and both, being Solana addresses, have a private key. So, what we do is use tweetnacl to encrypt/decrypt messages with both pairs, and use Phantom to sign the transaction.
 
+Note that, the ED keys use by Solana are unsuitable for encryption, so we're doing a hackery thing to convert them into Curve, with the ed2curve library
+
 **IMPORTANT**: For added safety, generate a new wallet to use with this app, since you'll have to copy your private key. It is not transmitted, just use locally to encrypt/decrypt. In a future version we'll add a more robust system to handle this issue.
 
 ## Caveats
 
-This app may or may not be secure; it's not fully tested, we're not cryptography experts. The goal here is to have discreet comms, not ultra-secure-quantum messages. So don't go around sending weird stuff that you'd be uncomfortable having exposed, cause a determined hacker will *probably* find a way to read it. 
+This app may or may not be secure; most likely it is not, we're not cryptography experts. The goal here is to have discreet comms, safe from casual observers, not ultra-secure-quantum messages. So don't go around sending weird stuff that you'd be uncomfortable having exposed, cause a determined hacker will *probably* find a way to read it, mmmmmkay? 
+
+## Other stuff
+
+TBH having a way to use your Solana keypair to move encryted data would be a useful feature to have solidly available on chain. Above my current paygrade, but later, who knows?
+
+## Stack
+
+Node 22  
+React 18  
+FE built AI assisted with Bolt  
+twetnacl for encryption  
+ed2curve for the conversion
+anchor 0.31.1  
 
 ## Permitted uses
 
