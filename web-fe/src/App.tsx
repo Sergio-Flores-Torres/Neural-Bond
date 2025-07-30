@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Zap, MessageCircle, User, Settings, DollarSign } from 'lucide-react';
+import { Send, Zap, MessageCircle, User, Settings, DollarSign, Github, ExternalLink, Linkedin } from 'lucide-react';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -12,7 +12,7 @@ function App() {
   const [receivedMessages, setReceivedMessages] = useState([
     {
       id: 1,
-      content: "Neural link established. Welcome to the network, choom.",
+      content: "Neural bond established. Welcome to the network, choom.",
       senderAddress: "1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z",
       timestamp: "2077-12-25T15:30:00Z"
     },
@@ -112,10 +112,10 @@ function App() {
             <div className="flex items-center justify-center mb-4">
               <Zap className="w-8 h-8 text-cyan-400 mr-2" />
               <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-pink-400 bg-clip-text text-transparent">
-                Neural Link
+                Neural Bond
               </h1>
             </div>
-            <p className="text-gray-400 text-sm">Secure blockchain messaging protocol</p>
+            <p className="text-gray-400 text-sm">Secure Solana messaging protocol by SAFT.Industries</p>
           </div>
 
           {/* Main form container */}
@@ -130,7 +130,7 @@ function App() {
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Enter your encrypted message..."
+                    placeholder="Enter your clear text message; it will be encrypted locally with your private key..."
                     className="w-full h-32 px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:outline-none transition-all duration-300 resize-none"
                     maxLength={500}
                   />
@@ -143,7 +143,7 @@ function App() {
               {/* Address input */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-pink-400">
-                  Base59 Blockchain Address
+                  Solana Public Address
                 </label>
                 <input
                   type="text"
@@ -207,7 +207,7 @@ function App() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-yellow-400">
-                    Price to Receive Messages (ETH)
+                    Price to Receive Messages (SOL)
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -321,6 +321,60 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="relative z-10 mt-12 pb-8">
+        <div className="max-w-md mx-auto px-4">
+          <div className="backdrop-blur-xl bg-black/20 ">
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-6 mb-4">
+                <a
+                  href="https://github.com/Sergio-Flores-Torres/neural-bond"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center space-x-2 px-4 py-2 bg-black/40 border border-gray-700 rounded-lg hover:border-cyan-400 hover:bg-black/60 transition-all duration-300 transform hover:scale-105"
+                >
+                  <Github className="w-5 h-5 text-gray-400 group-hover:text-cyan-400 transition-colors duration-300" />
+                  <span className="text-gray-400 group-hover:text-cyan-400 transition-colors duration-300 font-medium">
+                    GitHub
+                  </span>
+                  <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-cyan-400 transition-colors duration-300" />
+                </a>
+                
+                <a
+                  href="https://linkedin.com/company/saft-industries"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center space-x-2 px-4 py-2 bg-black/40 border border-gray-700 rounded-lg hover:border-blue-400 hover:bg-black/60 transition-all duration-300 transform hover:scale-105"
+                >
+                  <Linkedin className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" />
+                  <span className="text-gray-400 group-hover:text-blue-400 transition-colors duration-300 font-medium">
+                    LinkedIn
+                  </span>
+                  <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-blue-400 transition-colors duration-300" />
+                </a>
+              </div>
+              
+              <div className="text-xs text-gray-500 space-y-1">
+
+                <p>© 2025 Neural Bond v0.1.0 by <a href="https://saft.industries" className="text-cyan-400 hover:underline">SAFT.Industries</a>. Some rights reserved.</p>
+				<br/>
+				<p>Star us on Github && Send us business on Linkedin</p>
+                <p className="flex items-center justify-center space-x-2">
+                  <span>Built with</span>
+                  <Zap className="w-3 h-3 text-cyan-400" />
+                  <span>React & TypeScript</span>
+				  <br/>
+ 		          <img src="/saft.png" alt="SAFT logo" className="inline-block" />
+                </p>
+				<br/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+
     </div>
   );
 }
