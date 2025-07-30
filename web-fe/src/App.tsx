@@ -1,14 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Send, Zap, MessageCircle, User, Settings, DollarSign, Github, ExternalLink, Linkedin } from 'lucide-react';
+import { WalletProvider, ConnectionProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { clusterApiUrl } from "@solana/web3.js";
+import '@solana/wallet-adapter-react-ui/styles.css';
 
 function App() {
   const [message, setMessage] = useState('');
+  const [encryptionKey, setEncryptionKey] = useState('');
   const [address, setAddress] = useState('');
   const [messagePrice, setMessagePrice] = useState('0.001');
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [lastSent, setLastSent] = useState<string | null>(null);
   const [lastConfigSaved, setLastConfigSaved] = useState<string | null>(null);
+      const [isClient, setIsClient] = useState(false);
+
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
+
   const [receivedMessages, setReceivedMessages] = useState([
     {
       id: 1,
@@ -23,6 +36,15 @@ function App() {
       timestamp: "2077-12-25T16:45:00Z"
     }
   ]);
+	const network = WalletAdapterNetwork.Devnet;
+	const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+	const wallets = useMemo(
+	  () => [
+		// Add other wallets here
+	  ],
+	  [network],
+	);
+
 
   // Placeholder API call function
   const sendMessage = async () => {
@@ -89,6 +111,10 @@ function App() {
   const isValidPrice = messagePrice.trim().length > 0 && !isNaN(parseFloat(messagePrice)) && parseFloat(messagePrice) >= 0;
 
   return (
+		  <ConnectionProvider endpoint={endpoint}>
+		<WalletProvider wallets={wallets} autoConnect>
+		  <WalletModalProvider>
+
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black relative overflow-hidden">
       {/* Cyberpunk grid overlay */}
       <div className="absolute inset-0 opacity-10">
@@ -105,6 +131,7 @@ function App() {
       <div className="absolute top-20 left-20 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
 
+
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Header */}
@@ -115,12 +142,57 @@ function App() {
                 Neural Bond
               </h1>
             </div>
-            <p className="text-gray-400 text-sm">Secure Solana messaging protocol by SAFT.Industries</p>
+            <p className="text-gray-400 text-sm">Semi-secure Solana messaging protocol by SAFT.Industries <br/> PoC - DEVNET version</p>
+			<br/>
+           {isClient && <WalletMultiButton />}
+
+            {/* Instructions */}
+            <div className="mt-8 space-y-2">
+              <div className="flex items-center text-xs text-gray-500">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 flex-shrink-0"></div>
+                <span>Generate a new wallet on Phantom and paste your private key</span>
+              </div>
+              <div className="flex items-center text-xs text-gray-500">
+                <div className="w-2 h-2 bg-pink-400 rounded-full mr-3 flex-shrink-0"></div>
+                <span>Enter your message and recipient's address</span>
+              </div>
+              <div className="flex items-center text-xs text-gray-500">
+                <div className="w-2 h-2 bg-purple-400 rounded-full mr-3 flex-shrink-0"></div>
+                <span>Configure message pricing to control incoming transmissions</span>
+              </div>
+            </div>
           </div>
 
           {/* Main form container */}
           <div className="backdrop-blur-xl bg-black/30 border border-cyan-500/20 rounded-2xl p-6 shadow-2xl">
             <div className="space-y-6">
+
+              {/* Encryption key input */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-green-400">
+                  <div className="flex items-center space-x-2">
+                    <span>Encryption Key</span>
+                    <div className="relative group">
+                      <div className="w-4 h-4 bg-green-400/20 border border-green-400/40 rounded-full flex items-center justify-center cursor-help">
+                        <span className="text-green-400 text-xs font-bold">?</span>
+                      </div>
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 border border-green-400/30 rounded text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-10">
+                        Phantom won't encrypt external data; if we send the data in clear text, anybody can read it, by using PKI, private keys stay safe, while enabling communication.
+						<br/>
+						Create a new address to send/receive messages, export the private key and just keep enough SOL in it to execute the transactions.
+                      </div>
+                    </div>
+                  </div>
+                </label>
+                <input
+                  type="password"
+                  value={encryptionKey}
+                  onChange={(e) => setEncryptionKey(e.target.value)}
+                  placeholder="Paste your encryption key..."
+                  className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 focus:outline-none transition-all duration-300 font-mono text-sm"
+                />
+              </div>
+
               {/* Message input */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-cyan-400">
@@ -323,9 +395,9 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-10 mt-12 pb-8">
-        <div className="max-w-md mx-auto px-4">
-          <div className="backdrop-blur-xl bg-black/20 ">
+      <footer className="mt-9">
+        <div className="max-w-md mx-auto px-">
+          <div className="backdrop-blur-xl bg-black/20 rounded-2xl p-6 shadow-2xl">
             <div className="text-center">
               <div className="flex items-center justify-center space-x-6 mb-4">
                 <a
@@ -376,6 +448,9 @@ function App() {
 
 
     </div>
+			  </WalletModalProvider>
+		</WalletProvider>
+	  </ConnectionProvider>
   );
 }
 

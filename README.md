@@ -1,9 +1,9 @@
 # NeuralBond
 
-"Chooms! I have a hot new Solana mod for you, right here. They call it -NeuralBond- and it's fresh off the SAFT.Industries factory. It's encrypted, it's descentralized, it's anoymous, it allows you receive messages from anybody and charge them for the privilege... or you can let them message you for free, if you're into that..."
+"Chooms! I have a hot new Solana mod for you, right here. They call it -NeuralBond- and it's fresh off the SAFT.Industries factory. It's encrypted, it's decentralized, it's anoymous, it allows you receive messages from anybody and charge them for the privilege... or you can let them message you for free, if you're into that..."
 
 ## TLDR
-A Solana on-chain messaging system, encrypted, public and descentralized with the purpose of enabling the users to receive paid messages from the public and eliminate spam.
+A Solana on-chain messaging system, encrypted, public and decentralized with the purpose of enabling the users to receive paid messages from the public and eliminate spam.
 
 ## Rationale
 
@@ -24,11 +24,15 @@ Neuralbond allows a creator to publish their public Solana address, to receive a
 
 ## How it works
 
-A web app, fully descentralized allows the receiver to connect their Phantom wallet and configure a price to initiate communication (if so desired), then they only need to make available said address to the publir or potential senders.
+A web app, fully decentralized allows the receiver to connect their Phantom wallet and configure a price to initiate communication (if so desired), then they only need to make available said address to the publir or potential senders.
 
 With the same web app, a sender, can connect their Phantom wallet, input the receiver's address and send a message by paying the fee.
 
-The messages are stored on chain, encrypted end-to-end (because, data on-chain is fully public) and the messages are deleted upon retrieval by the recipient.
+The messages are stored on chain, encrypted end-to-end (because, data on-chain is fully public) and the messages are deleted upon retrieval by the recipient, returning the rent to the sender.
+
+So, because we cannot exchange the encryption keys securely, we are relying in public knowledge: We know the public address of the recipient, and the recipient will know the public address of the sender, and both, being Solana addresses, have a private key. So, what we do is use tweetnacl to encrypt/decrypt messages with both pairs, and use Phantom to sign the transaction.
+
+**IMPORTANT**: For added safety, generate a new wallet to use with this app, since you'll have to copy your private key. It is not transmitted, just use locally to encrypt/decrypt. In a future version we'll add a more robust system to handle this issue.
 
 ## Caveats
 
