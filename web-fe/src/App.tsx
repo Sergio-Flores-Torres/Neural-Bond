@@ -5,9 +5,17 @@ import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-r
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import '@solana/wallet-adapter-react-ui/styles.css';
+import { Program, Idl, AnchorProvider, setProvider, web3, BN } from "@coral-xyz/anchor";
 import { test } from './encryption';
+import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
 
-function App() {
+import idl from "./neuralbond_solana_program.json";
+import type { NeuralbondSolanaProgram } from "./neuralbond_solana_program";
+
+ 
+function Main() {
   const [message, setMessage] = useState('');
   const [encryptionKey, setEncryptionKey] = useState('');
   const [address, setAddress] = useState('');
@@ -18,9 +26,11 @@ function App() {
   const [lastConfigSaved, setLastConfigSaved] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
+  const { connection } = useConnection();
+  const wallet = useAnchorWallet();
+
   useEffect(() => {
 	setIsClient(true);
-	test();
   }, []);
 
   const [receivedMessages, setReceivedMessages] = useState([
@@ -37,15 +47,6 @@ function App() {
       timestamp: "2077-12-25T16:45:00Z"
     }
   ]);
-	const network = WalletAdapterNetwork.Devnet;
-	const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-	const wallets = useMemo(
-	  () => [
-		// Add other wallets here
-	  ],
-	  [network],
-	);
-
 
   // Placeholder API call function
   const sendMessage = async () => {
@@ -83,15 +84,31 @@ function App() {
   const saveConfiguration = async () => {
     setIsSavingConfig(true);
     try {
-      // Simulate API call - replace with actual endpoint later
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Placeholder for actual API call:
-      // const response = await fetch('/api/save-config', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ messagePrice: parseFloat(messagePrice) })
-      // });
+		const { solana } = window;
+
+		if (solana && solana.isPhantom && solana.isConnected) {
+			console.log('Phantom wallet connected!');
+
+			const provider = new AnchorProvider(connection, wallet!, {commitment: 'confirmed'});
+			setProvider(provider);
+			// we can also explicitly mention the provider
+			const program = new Program(idl as NeuralbondSolanaProgram, provider);	
+
+			try {
+				const tx = await program.methods.saveMessageConfig(new BN(parseFloat(messagePrice) * web3.LAMPORTS_PER_SOL))
+					.accounts({
+					})
+					.rpc();
+					console.log("Your transaction signature", tx);
+
+			} catch (error) {	
+				alert(error)
+			}
+
+		} else {
+			console.log('Phantom wallet not connected...');
+			alert('Please connect your Phantom wallet first.');
+		}
       
       setLastConfigSaved(new Date().toLocaleTimeString());
     } catch (error) {
@@ -112,9 +129,6 @@ function App() {
   const isValidPrice = messagePrice.trim().length > 0 && !isNaN(parseFloat(messagePrice)) && parseFloat(messagePrice) >= 0;
 
   return (
-		  <ConnectionProvider endpoint={endpoint}>
-		<WalletProvider wallets={wallets} autoConnect>
-		  <WalletModalProvider>
 
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black relative overflow-hidden">
       {/* Cyberpunk grid overlay */}
@@ -300,7 +314,7 @@ function App() {
                     />
                   </div>
                   <p className="text-xs text-gray-500">
-                    Set the minimum amount senders must pay to deliver messages to your address
+                    Set the minimum amount senders must pay to deliver messages to your address. It can be zero for free messages, but you must set a price to receive messages.
                   </p>
                 </div>
 
@@ -453,10 +467,29 @@ function App() {
 		<br/><br/>
 
     </div>
-			  </WalletModalProvider>
+
+  );
+}
+
+function App() {
+	const network = WalletAdapterNetwork.Devnet;
+	const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+	const wallets = useMemo(
+	  () => [
+		// Add other wallets here
+	  ],
+	  [network],
+	);
+
+	return (
+	<ConnectionProvider endpoint={endpoint}>
+		<WalletProvider wallets={wallets} autoConnect>
+		  <WalletModalProvider>
+				<Main />
+			</WalletModalProvider>
 		</WalletProvider>
 	  </ConnectionProvider>
-  );
+	);
 }
 
 export default App;
