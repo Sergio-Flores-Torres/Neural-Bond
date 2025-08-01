@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Send, Zap, MessageCircle, User, Settings, DollarSign, Github, ExternalLink, Linkedin } from 'lucide-react';
+import { Send, Zap, MessageCircle, User, Settings, DollarSign, Github, ExternalLink, Linkedin, Trash2 } from 'lucide-react';
 import { WalletProvider, ConnectionProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
@@ -118,6 +118,21 @@ function Main() {
     }
   };
 
+    // Placeholder function to delete a message
+  const deleteMessage = async (messageId: number) => {
+    try {
+      // Placeholder for actual API call:
+      // const response = await fetch(`/api/delete-message/${messageId}`, {
+      //   method: 'DELETE'
+      // });
+      
+      // For now, just remove from local state
+      setReceivedMessages(prev => prev.filter(msg => msg.id !== messageId));
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+    }
+  };
+
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
   };
@@ -126,6 +141,7 @@ function Main() {
     return `${address.slice(0, 8)}...${address.slice(-8)}`;
   };
   const isValidForm = message.trim().length > 0 && address.trim().length > 0;
+  const isValidFormWithKey = isValidForm && encryptionKey.trim().length > 0;
   const isValidPrice = messagePrice.trim().length > 0 && !isNaN(parseFloat(messagePrice)) && parseFloat(messagePrice) >= 0;
 
   return (
@@ -397,6 +413,13 @@ function Main() {
                                 {formatTimestamp(msg.timestamp)}
                               </span>
                             </div>
+                            <button
+                              onClick={() => deleteMessage(msg.id)}
+                              className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/20 hover:text-red-400 text-gray-500 transition-all duration-300 transform hover:scale-110"
+                              title="Delete message"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>							
                           </div>
                           <p className="text-gray-300 text-sm leading-relaxed group-hover:text-white transition-colors duration-300">
                             {msg.content}
