@@ -12,11 +12,21 @@ import * as ed2curve from 'ed2curve';
 
 const newNonce = () => randomBytes(box.nonceLength);
 
-export const encryptMessage = (message: string, recipient: any, sender: any): string => {
+export const encryptMessage = (message: string, receiver: web3.PublicKey, key: web3.Keypair): string => {
+
+	const convertedKey = ed2curve.convertKeyPair(key);
+	if (!convertedKey) {
+		throw new Error('Failed to convert key pair');
+	}
+
+	const receiverPublicKey = ed2curve.convertPublicKey(receiver);
+	if (!receiverPublicKey) {
+		throw new Error('Failed to convert receiver public key');
+	}
 
 	const nonce = newNonce();
 	const messageUint8 = encodeUTF8(message);
-	const secretOrSharedKey = box.before(recipient, sender.secretKey);
+	const secretOrSharedKey = box.before(receiverPublicKey, convertedKey.secretKey);
 	const encrypted = box.after(messageUint8, nonce, secretOrSharedKey);
 
 	const fullMessage = new Uint8Array(nonce.length + encrypted.length);
@@ -27,7 +37,17 @@ export const encryptMessage = (message: string, recipient: any, sender: any): st
 	return base64FullMessage;
 };
 
-export const decryptMessage = (encryptedMessage: string, sender: any, key: any): string => {
+export const decryptMessage = (encryptedMessage: string, sender: web3.PublicKey, key: web3.Keypair): string => {
+
+	const convertedKey = ed2curve.convertKeyPair(key);
+	if (!convertedKey) {
+		throw new Error('Failed to convert key pair');
+	}
+
+	const senderPublicKey = ed2curve.convertPublicKey(sender);
+	if (!senderPublicKey) {
+		throw new Error('Failed to convert sender public key');
+	}
 
 	const messageWithNonceAsUint8Array = decodeBase64(encryptedMessage);
 	const nonce = messageWithNonceAsUint8Array.slice(0, box.nonceLength);
@@ -36,7 +56,7 @@ export const decryptMessage = (encryptedMessage: string, sender: any, key: any):
 		messageWithNonceAsUint8Array.length
 	);
 
-	const secretOrSharedKey = box.before(sender, key.secretKey);
+	const secretOrSharedKey = box.before(senderPublicKey, convertedKey.secretKey);
 	const decrypted = box.open.after(message, nonce, secretOrSharedKey);
 
 	if (!decrypted) {
@@ -51,18 +71,9 @@ export const test = () => {
 	const pairA = web3.Keypair.generate();
 	const pairB = web3.Keypair.generate();
 
-	const convertedKeyPairA = ed2curve.convertKeyPair(pairA);
-	if (!convertedKeyPairA) {
-		throw new Error('Failed to convert key pair');
-	}
-	const convertedKeyPairB = ed2curve.convertKeyPair(pairB);
-	if (!convertedKeyPairB) {
-		throw new Error('Failed to convert key pair');
-	}
-
 	const msg = "This is not a test message.";
-	const encrypted = encryptMessage(msg, convertedKeyPairB.publicKey, convertedKeyPairA);
-	const decrypted = decryptMessage(encrypted, convertedKeyPairA.publicKey, convertedKeyPairB);
+	const encrypted = encryptMessage(msg, pairB.publicKey, pairA);
+	const decrypted = decryptMessage(encrypted, pairA.publicKey, pairB);
 
 	console.log(msg, encrypted, decrypted);
 };

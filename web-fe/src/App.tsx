@@ -132,7 +132,7 @@ function App() {
       <div className="absolute top-20 left-20 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
 
-
+		<img src="/title.jpg" alt="Neural Bond Logo" width={512} height={288} className="w-512 h-288 mx-auto" />
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Header */}
@@ -143,6 +143,7 @@ function App() {
                 Neural Bond
               </h1>
             </div>
+
             <p className="text-gray-400 text-sm">Possibly totally unsafe Solana messaging protocol by SAFT.Industries <br/> PoC - DEVNET version</p>
 			<br/>
            {isClient && <WalletMultiButton />}
@@ -165,34 +166,36 @@ function App() {
           </div>
 
           {/* Main form container */}
-          <div className="backdrop-blur-xl bg-black/30 border border-cyan-500/20 rounded-2xl p-6 shadow-2xl">
-            <div className="space-y-6">
-
-              {/* Encryption key input */}
-              <div className="space-y-2">
+          {/* Encryption Key Section */}
+          <div className="backdrop-blur-xl bg-black/30 border border-green-500/20 rounded-2xl p-6 shadow-2xl mb-6">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
                 <label className="block text-sm font-medium text-green-400">
-                  <div className="flex items-center space-x-2">
-                    <span>Encryption Key</span>
-                    <div className="relative group">
-                      <div className="w-4 h-4 bg-green-400/20 border border-green-400/40 rounded-full flex items-center justify-center cursor-help">
-                        <span className="text-green-400 text-xs font-bold">?</span>
-                      </div>
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 border border-green-400/30 rounded text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-10">
-                        Phantom won't encrypt external data; if we send the data in clear text, anybody can read it, by using PKI, private keys stay safe, while enabling communication.
+                  Encryption Key
+                </label>
+                <div className="relative group">
+                  <div className="w-4 h-4 bg-green-500/20 border border-green-500/40 rounded-full flex items-center justify-center cursor-help text-xs text-green-400 font-bold">
+                    ?
+                  </div>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 border border-green-500/30 rounded text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-50">
+                         Phantom won't encrypt external data; if we send the data in clear text, anybody can read it, by using PKI, private keys stay safe, while enabling communication.
 						<br/>
 						Create a new address to send/receive messages, export the private key and just keep enough SOL in it to execute the transactions.
-                      </div>
-                    </div>
                   </div>
-                </label>
-                <input
-                  type="password"
-                  value={encryptionKey}
-                  onChange={(e) => setEncryptionKey(e.target.value)}
-                  placeholder="Paste your encryption key..."
-                  className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 focus:outline-none transition-all duration-300 font-mono text-sm"
-                />
+                </div>
               </div>
+              <input
+                type="password"
+                value={encryptionKey}
+                onChange={(e) => setEncryptionKey(e.target.value)}
+                placeholder="Paste your encryption key here..."
+                className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 focus:outline-none transition-all duration-300 font-mono text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="backdrop-blur-xl bg-black/30 border border-cyan-500/20 rounded-2xl p-6 shadow-2xl">
+            <div className="space-y-6">
 
               {/* Message input */}
               <div className="space-y-2">
@@ -447,6 +450,7 @@ function App() {
         </div>
       </footer>
 
+		<br/><br/>
 
     </div>
 			  </WalletModalProvider>
