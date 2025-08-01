@@ -58,6 +58,8 @@ FE built AI assisted with Bolt
 twetnacl for encryption  
 ed2curve for the conversion   
 anchor 0.31.1   
+Solana 2.2.6. 
+Rust 1.18.  
 
 ## Screenshot
 
