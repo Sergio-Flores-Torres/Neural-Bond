@@ -2,7 +2,7 @@
 
 ![NeuralBond by SAFT.Industries](web-fe/public/title.jpg)
 
-"Chooms! I have a hot new Solana mod for you, right here. They call it -NeuralBond- and it's fresh off the SAFT.Industries factory. It's encrypted, it's decentralized, it's anoymous, it allows you receive messages from anybody and charge them for the privilege... or you can let them message you for free, if you're into that..."
+"Chooms! I have a hot new Solana mod for you, right here. They call it -NeuralBond- and it's fresh off the SAFT.Industries factory. It's encrypted, it's decentralized, it's anonymous, it allows you to receive messages from anybody and charge them for the privilege... or you can let them message you for free, if you're into that..."
 
 ## TLDR
 A Solana on-chain messaging system, encrypted, public and decentralized with the purpose of enabling the users to receive paid messages from the public and eliminate spam.
