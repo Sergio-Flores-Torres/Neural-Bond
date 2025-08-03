@@ -54,9 +54,11 @@ Send me messages at: Ak1bE6EzNnChB3UJTD11Yu84Y9LxLca5Qqsb7hbQBkcT.
 ## Explanatory videos
 
 NeuralBond PoC Demo video:  
+
 [![NeuralBond PoC Demo video](http://img.youtube.com/vi/aTaXX-0vNBI/0.jpg)](http://www.youtube.com/watch?v=aTaXX-0vNBI "NeuralBond PoC Demo video")   
 
 NeuralBond PoC Code walkthrough:  
+
 [![NeuralBond PoC Code walkthrough](http://img.youtube.com/vi/swqgKzWGsdI/0.jpg)](http://www.youtube.com/watch?v=swqgKzWGsdI "NeuralBond PoC Code walkthrough")   
 
 ## Caveats
