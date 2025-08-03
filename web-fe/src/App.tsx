@@ -258,6 +258,10 @@ function Main() {
                 <div className="w-2 h-2 bg-purple-400 rounded-full mr-3 flex-shrink-0"></div>
                 <span>Configure message pricing to control incoming transmissions</span>
               </div>
+              <div className="flex items-center text-xs text-gray-500">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full mr-3 flex-shrink-0"></div>
+                <span>See github for detailed instructions and videos</span>
+              </div>
             </div>
           </div>
 
