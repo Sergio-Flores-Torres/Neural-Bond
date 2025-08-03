@@ -42,7 +42,18 @@ Note that, the ED keys use by Solana are unsuitable for encryption, so we're doi
 
 **IMPORTANT**: For added safety, generate a new wallet to use with this app, since you'll have to copy your private key. It is not transmitted, just used locally to encrypt/decrypt. Maybe in a future version we'll add a more robust system to handle this issue.
 
-See the [detailed instructions](instructions.md) on how to use, if you want.
+See the [detailed instructions](instructions.md) on how to use, if you want.   
+
+The program is available on DEVNET at: UfQzdDXyS6huk6DTDKvvM5pTK2VtWQVmaGiNJ5qTJmo   
+Send me messages at: Ak1bE6EzNnChB3UJTD11Yu84Y9LxLca5Qqsb7hbQBkcT.  
+
+## Media
+
+![NeuralBond by SAFT.Industries](web-fe/public/screenshot.jpg) 
+
+[![NeuralBond PoC Demo video](http://img.youtube.com/vi/aTaXX-0vNBI/0.jpg)](http://www.youtube.com/watch?v=aTaXX-0vNBI "NeuralBond PoC Demo video")   
+
+[![NeuralBond PoC Code walkthrough](http://img.youtube.com/vi/swqgKzWGsdI/0.jpg)](http://www.youtube.com/watch?v=swqgKzWGsdI "NeuralBond PoC Code walkthrough")   
 
 ## Caveats
 
@@ -62,10 +73,6 @@ ed2curve for the conversion
 anchor 0.31.1   
 Solana 2.2.6. 
 Rust 1.18.  
-
-## Screenshot
-
-![NeuralBond by SAFT.Industries](web-fe/public/screenshot.jpg)
 
 ## Permitted uses
 
