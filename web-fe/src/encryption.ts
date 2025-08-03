@@ -12,9 +12,9 @@ import * as ed2curve from 'ed2curve';
 
 const newNonce = () => randomBytes(box.nonceLength);
 
-export const encryptMessage = (message: string, receiver: web3.PublicKey, key: web3.Keypair): string => {
+export const encryptMessage = (message: string, receiver: Uint8Array, key: Uint8Array): string => {
 
-	const convertedKey = ed2curve.convertKeyPair(key);
+	const convertedKey = ed2curve.convertSecretKey(key);
 	if (!convertedKey) {
 		throw new Error('Failed to convert key pair');
 	}
@@ -26,7 +26,7 @@ export const encryptMessage = (message: string, receiver: web3.PublicKey, key: w
 
 	const nonce = newNonce();
 	const messageUint8 = encodeUTF8(message);
-	const secretOrSharedKey = box.before(receiverPublicKey, convertedKey.secretKey);
+	const secretOrSharedKey = box.before(receiverPublicKey, convertedKey);
 	const encrypted = box.after(messageUint8, nonce, secretOrSharedKey);
 
 	const fullMessage = new Uint8Array(nonce.length + encrypted.length);
@@ -37,9 +37,9 @@ export const encryptMessage = (message: string, receiver: web3.PublicKey, key: w
 	return base64FullMessage;
 };
 
-export const decryptMessage = (encryptedMessage: string, sender: web3.PublicKey, key: web3.Keypair): string => {
+export const decryptMessage = (encryptedMessage: string, sender: Uint8Array, key: Uint8Array): string => {
 
-	const convertedKey = ed2curve.convertKeyPair(key);
+	const convertedKey = ed2curve.convertSecretKey(key);
 	if (!convertedKey) {
 		throw new Error('Failed to convert key pair');
 	}
@@ -56,7 +56,7 @@ export const decryptMessage = (encryptedMessage: string, sender: web3.PublicKey,
 		messageWithNonceAsUint8Array.length
 	);
 
-	const secretOrSharedKey = box.before(senderPublicKey, convertedKey.secretKey);
+	const secretOrSharedKey = box.before(senderPublicKey, convertedKey);
 	const decrypted = box.open.after(message, nonce, secretOrSharedKey);
 
 	if (!decrypted) {
@@ -72,8 +72,8 @@ export const test = () => {
 	const pairB = web3.Keypair.generate();
 
 	const msg = "This is not a test message.";
-	const encrypted = encryptMessage(msg, pairB.publicKey, pairA);
-	const decrypted = decryptMessage(encrypted, pairA.publicKey, pairB);
+	const encrypted = encryptMessage(msg, pairB.publicKey.toBytes(), pairA.secretKey);
+	const decrypted = decryptMessage(encrypted, pairA.publicKey.toBytes(), pairB.secretKey);
 
 	console.log(msg, encrypted, decrypted);
 };

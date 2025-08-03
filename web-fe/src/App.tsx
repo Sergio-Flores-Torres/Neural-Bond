@@ -6,8 +6,9 @@ import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { Program, Idl, AnchorProvider, setProvider, web3, BN } from "@coral-xyz/anchor";
-import { test } from './encryption';
+import { test, encryptMessage, decryptMessage } from './encryption';
 import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { base58_to_binary, binary_to_base58 } from "base58-js";
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
@@ -35,13 +36,13 @@ function Main() {
 
   const [receivedMessages, setReceivedMessages] = useState([
     {
-      id: 1,
+      id: "xxx",
       content: "Neural bond established. Welcome to the network, choom.",
       senderAddress: "1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z",
       timestamp: "2077-12-25T15:30:00Z"
     },
     {
-      id: 2,
+      id: "yyy",
       content: "Data packet received. Initiating secure protocol handshake.",
       senderAddress: "9Z8Y7X6W5V4U3T2S1R0Q9P8O7N6M5L4K3J2I1H0G9F8E7D6C5B4A3",
       timestamp: "2077-12-25T16:45:00Z"
@@ -52,21 +53,37 @@ function Main() {
   const sendMessage = async () => {
     setIsLoading(true);
     try {
-      // Simulate API call - replace with actual endpoint later
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Placeholder for actual API call:
-      // const response = await fetch('/api/send-message', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ message, address })
-      // });
-      
-      setLastSent(new Date().toLocaleTimeString());
-      setMessage('');
-      setAddress('');
+		const { solana } = window;
+
+		if (solana && solana.isPhantom && solana.isConnected) {
+			console.log('Phantom wallet connected!');
+
+			const provider = new AnchorProvider(connection, wallet!, {commitment: 'confirmed'});
+			setProvider(provider);
+			// we can also explicitly mention the provider
+			const program = new Program(idl as NeuralbondSolanaProgram, provider);	
+			const encrypted_message = encryptMessage(message, base58_to_binary(address), base58_to_binary(encryptionKey));
+
+			const tx = await program.methods.sendMessage(encrypted_message)
+				.accounts({
+					receiver: address,
+				})
+				.rpc();
+				console.log("Your transaction signature", tx);
+
+			setLastSent(new Date().toLocaleTimeString());
+			setMessage('');
+			setAddress('');
+
+		} else {
+			console.log('Phantom wallet not connected...');
+			alert('Please connect your Phantom wallet first.');
+		}
+
+
     } catch (error) {
       console.error('Failed to send message:', error);
+	  alert('Failed to send message:' + error);
     } finally {
       setIsLoading(false);
     }
@@ -74,10 +91,40 @@ function Main() {
 
   // Placeholder function to fetch received messages
   const fetchReceivedMessages = async () => {
-    // Placeholder for actual API call:
-    // const response = await fetch('/api/received-messages');
-    // const messages = await response.json();
-    // setReceivedMessages(messages);
+	const provider = new AnchorProvider(connection, wallet!, {});
+	setProvider(provider);
+
+	// we can also explicitly mention the provider
+	const program = new Program(idl as NeuralbondSolanaProgram, provider);
+
+ 	const accounts = await connection.getParsedProgramAccounts(
+    new web3.PublicKey(program.programId),
+    {
+      filters: [
+        {
+          memcmp: {
+            offset: 8, // number of bytes
+            bytes: wallet!.publicKey.toBase58()
+          },
+        },
+      ],
+    });
+	let messages = [];
+	for (let i = 0; i < accounts.length; i++) {
+		try {
+			const account = await program.account.message.fetch(accounts[i].pubkey);	
+			let msg = decryptMessage(account.encryptedMessage, base58_to_binary(account.sender.toBase58()), base58_to_binary(encryptionKey));
+			messages.push({
+				id: accounts[i].pubkey.toBase58(),
+				content: msg,
+				senderAddress: account.sender.toBase58(),
+				timestamp: (new BN(account.createdAt) * 1000)
+			});		
+		} catch (error) {	
+			console.error('Failed-fetch/invalid account:', error);
+		}
+	}
+	setReceivedMessages(messages);
   };
 
   // Placeholder function to save configuration
@@ -119,15 +166,34 @@ function Main() {
   };
 
     // Placeholder function to delete a message
-  const deleteMessage = async (messageId: number) => {
+  const deleteMessage = async (messageId: string, messageSender: string) => {
     try {
-      // Placeholder for actual API call:
-      // const response = await fetch(`/api/delete-message/${messageId}`, {
-      //   method: 'DELETE'
-      // });
-      
-      // For now, just remove from local state
-      setReceivedMessages(prev => prev.filter(msg => msg.id !== messageId));
+		const { solana } = window;
+
+		if (solana && solana.isPhantom && solana.isConnected) {
+			console.log('Phantom wallet connected!');
+
+			const provider = new AnchorProvider(connection, wallet!, {commitment: 'confirmed'});
+			setProvider(provider);
+			// we can also explicitly mention the provider
+			const program = new Program(idl as NeuralbondSolanaProgram, provider);	
+
+			const tx = await program.methods.deleteMessage()
+				.accounts({
+					message: new web3.PublicKey(messageId),
+					receiver: wallet!.publicKey,
+					sender: new web3.PublicKey(messageSender),
+				})
+				.rpc();
+				console.log("Your transaction signature", tx);
+
+		    setReceivedMessages(prev => prev.filter(msg => msg.id !== messageId));
+
+		} else {
+			console.log('Phantom wallet not connected...');
+			alert('Please connect your Phantom wallet first.');
+		}
+
     } catch (error) {
       console.error('Failed to delete message:', error);
     }
@@ -378,9 +444,27 @@ function Main() {
                   <MessageCircle className="w-5 h-5 text-purple-400" />
                   <h2 className="text-lg font-semibold text-purple-400">Incoming Transmissions</h2>
                 </div>
-                <div className="text-xs text-gray-500">
-                  {receivedMessages.length} messages
-                </div>
+
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={fetchReceivedMessages}
+                    className="p-2 rounded-lg bg-black/40 border border-gray-700 hover:border-purple-400 hover:bg-black/60 transition-all duration-300 transform hover:scale-105 group"
+                    title="Refresh messages"
+                  >
+                    <div className="w-4 h-4 text-gray-400 group-hover:text-purple-400 transition-colors duration-300">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                        <path d="M21 3v5h-5"/>
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                        <path d="M3 21v-5h5"/>
+                      </svg>
+                    </div>
+                  </button>
+                  <div className="text-xs text-gray-500">
+                    {receivedMessages.length} messages
+                  </div>
+				</div>
+
               </div>
 
               <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
@@ -414,7 +498,7 @@ function Main() {
                               </span>
                             </div>
                             <button
-                              onClick={() => deleteMessage(msg.id)}
+                              onClick={() => deleteMessage(msg.id, msg.senderAddress)}
                               className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/20 hover:text-red-400 text-gray-500 transition-all duration-300 transform hover:scale-110"
                               title="Delete message"
                             >

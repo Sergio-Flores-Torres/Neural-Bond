@@ -42,6 +42,8 @@ Note that, the ED keys use by Solana are unsuitable for encryption, so we're doi
 
 **IMPORTANT**: For added safety, generate a new wallet to use with this app, since you'll have to copy your private key. It is not transmitted, just used locally to encrypt/decrypt. Maybe in a future version we'll add a more robust system to handle this issue.
 
+See the [detailed instructions](instructions.md) on how to use, if you want.
+
 ## Caveats
 
 This app may or may not be secure; most likely it is not, we're not cryptography experts. The goal here is to have discreet comms, safe from casual observers, not ultra-secure-quantum messages. So don't go around sending weird stuff that you'd be uncomfortable having exposed, cause a determined hacker will *probably* find a way to read it, mmmmmkay? Plus the copy pasting of the private key is a thing.
