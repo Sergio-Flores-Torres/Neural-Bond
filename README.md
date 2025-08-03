@@ -47,12 +47,16 @@ See the [detailed instructions](instructions.md) on how to use, if you want.
 The program is available on DEVNET at: UfQzdDXyS6huk6DTDKvvM5pTK2VtWQVmaGiNJ5qTJmo   
 Send me messages at: Ak1bE6EzNnChB3UJTD11Yu84Y9LxLca5Qqsb7hbQBkcT.  
 
-## Media
+## Gallery
 
 ![NeuralBond by SAFT.Industries](web-fe/public/screenshot.jpg) 
 
+## Explanatory videos
+
+NeuralBond PoC Demo video:  
 [![NeuralBond PoC Demo video](http://img.youtube.com/vi/aTaXX-0vNBI/0.jpg)](http://www.youtube.com/watch?v=aTaXX-0vNBI "NeuralBond PoC Demo video")   
 
+NeuralBond PoC Code walkthrough:  
 [![NeuralBond PoC Code walkthrough](http://img.youtube.com/vi/swqgKzWGsdI/0.jpg)](http://www.youtube.com/watch?v=swqgKzWGsdI "NeuralBond PoC Code walkthrough")   
 
 ## Caveats
