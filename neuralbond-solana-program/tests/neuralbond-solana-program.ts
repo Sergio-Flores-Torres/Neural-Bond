@@ -1,6 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { NeuralbondSolanaProgram } from "../target/types/neuralbond_solana_program";
+import { length } from "mocha/lib/interfaces/common";
 
 describe("neuralbond-solana-program", () => {
   // Configure the client to use the local cluster.
@@ -51,7 +52,7 @@ describe("neuralbond-solana-program", () => {
 
     it("Msg price saved!", async () => {
     // Add your test here.
-    const tx = await program.methods.saveMessageConfig(new anchor.BN(1000))
+    const tx = await program.methods.saveMessageConfig(new anchor.BN(1000), new Array(32).fill(0))
 	.accounts({
 		messageConfig: msgConfigPDAAddress,
 		receiver: receiverWallet.publicKey,

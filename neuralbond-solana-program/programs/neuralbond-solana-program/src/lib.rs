@@ -39,10 +39,11 @@ pub mod neuralbond_solana_program {
         Ok(())
     }
 
-    pub fn save_message_config(ctx: Context<ConfigMessage>, price: u64) -> Result<()> {
+    pub fn save_message_config(ctx: Context<ConfigMessage>, price: u64, encryption_pubkey: [u8; 32]) -> Result<()> {
 		let message_config = &mut ctx.accounts.message_config;
 		message_config.receiver = ctx.accounts.receiver.key();
 		message_config.price = price;
+		message_config.encryption_pubkey = encryption_pubkey;	
         Ok(())
     }
 
@@ -58,11 +59,14 @@ Holds the message price for a user.
 #[account]
 #[derive(InitSpace)]
 pub struct MessageConfig {
+	/// The price in lamports to send a message to this user
+	pub price: u64,
+
 	/// The receiver of the message
 	pub receiver: Pubkey,
 
-	/// The price in lamports to send a message to this user
-	pub price: u64,
+	/// The encryption pubkey of the receiver
+	pub encryption_pubkey: [u8; 32],
 }
 
 /**

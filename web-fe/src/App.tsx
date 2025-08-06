@@ -6,10 +6,14 @@ import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { Program, Idl, AnchorProvider, setProvider, web3, BN } from "@coral-xyz/anchor";
-import { test, encryptMessage, decryptMessage } from './encryption';
+import { test, encryptMessage, decryptMessage, generateKeyPair, encryptString, decryptString } from './encryption';
 import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { base58_to_binary, binary_to_base58 } from "base58-js";
 import { Buffer } from 'buffer';
+import {
+  decode as decodeBase64,
+  encode as encodeBase64,
+} from "@stablelib/base64";
 window.Buffer = Buffer;
 
 import idl from "./neuralbond_solana_program.json";
@@ -18,7 +22,7 @@ import type { NeuralbondSolanaProgram } from "./neuralbond_solana_program";
  
 function Main() {
   const [message, setMessage] = useState('');
-  const [encryptionKey, setEncryptionKey] = useState('');
+  const [passwordUnlock, setPasswordUnlock] = useState('');
   const [address, setAddress] = useState('');
   const [messagePrice, setMessagePrice] = useState('0.001');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,11 +55,49 @@ function Main() {
     }
   ]);
 
+  const getOrCreateEncryptionKey = (): any => {
+
+		if (!passwordUnlock) {
+			throw new Error('Password is required to generate or retrieve encryption key');
+		}
+
+		let data = localStorage.getItem('keyPair');
+		if (!data) {
+			const localKeyPair = generateKeyPair();
+
+			// Encrypt
+			const encryptedKey = encryptString(encodeBase64(localKeyPair.secretKey), passwordUnlock);
+
+			localStorage.setItem('keyPair', JSON.stringify({
+				publicKey: encodeBase64(localKeyPair.publicKey),
+				secretKey: encryptedKey
+			}));
+
+			return {
+				publicKey: encodeBase64(localKeyPair.publicKey),
+				secretKey: encodeBase64(localKeyPair.secretKey)
+			};
+		} else {
+			const keyPair = JSON.parse(data);
+			if (!keyPair.secretKey || !keyPair.publicKey) {
+				throw new Error('Invalid key pair data in local storage');
+			}
+
+			// Decrypt
+			const decryptedKey = decryptString(keyPair.secretKey, passwordUnlock);
+			return {
+				publicKey: keyPair.publicKey,
+				secretKey: decryptedKey
+			};
+		}
+  }
+
   // Placeholder API call function
   const sendMessage = async () => {
     setIsLoading(true);
     try {
 		const { solana } = window;
+		let localKeyPair = getOrCreateEncryptionKey();
 
 		if (solana && solana.isPhantom && solana.isConnected) {
 			console.log('Phantom wallet connected!');
@@ -64,7 +106,7 @@ function Main() {
 			setProvider(provider);
 			// we can also explicitly mention the provider
 			const program = new Program(idl as NeuralbondSolanaProgram, provider);	
-			const encrypted_message = encryptMessage(message, base58_to_binary(address), base58_to_binary(encryptionKey));
+			const encrypted_message = encryptMessage(message, base58_to_binary(address), localKeyPair.secretKey);
 
 			const tx = await program.methods.sendMessage(encrypted_message)
 				.accounts({
@@ -133,6 +175,7 @@ function Main() {
   const saveConfiguration = async () => {
     setIsSavingConfig(true);
     try {
+
 		const { solana } = window;
 
 		if (solana && solana.isPhantom && solana.isConnected) {
@@ -273,7 +316,7 @@ function Main() {
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <label className="block text-sm font-medium text-green-400">
-                  Encryption Key
+                  Password Unlock
                 </label>
                 <div className="relative group">
                   <div className="w-4 h-4 bg-green-500/20 border border-green-500/40 rounded-full flex items-center justify-center cursor-help text-xs text-green-400 font-bold">
@@ -282,15 +325,15 @@ function Main() {
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 border border-green-500/30 rounded text-xs text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-50">
                          Phantom won't encrypt external data; if we send the data in clear text, anybody can read it, by using PKI, private keys stay safe, while enabling communication.
 						<br/>
-						Create a new address to send/receive messages, export the private key and just keep enough SOL in it to execute the transactions.
+						Create a new address to send/receive messages, keep enough SOL in it to execute the transactions. This password will be used to encrypt/decrypt your actual PKI keys locally.
                   </div>
                 </div>
               </div>
               <input
                 type="password"
-                value={encryptionKey}
-                onChange={(e) => setEncryptionKey(e.target.value)}
-                placeholder="Paste your encryption key here..."
+                value={passwordUnlock}
+                onChange={(e) => setPasswordUnlock(e.target.value)}
+                placeholder="Paste your password here..."
                 className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-green-400 focus:ring-2 focus:ring-green-400/20 focus:outline-none transition-all duration-300 font-mono text-sm"
               />
             </div>
