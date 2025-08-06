@@ -38,14 +38,20 @@ The messages are stored on chain, encrypted end-to-end (because otherwise, data 
 
 So, because we cannot exchange the encryption keys securely, we are relying in public knowledge: We know the public address of the recipient, and the recipient will know the public address of the sender, and both, being Solana addresses, have a private key. So, what we do is use tweetnacl to encrypt/decrypt messages with both pairs, and use Phantom to sign the transaction.
 
-Note that, the ED keys use by Solana are unsuitable for encryption, so we're doing a hackery thing to convert them into Curve, with the ed2curve library
+Note that, the ED keys use by Solana are unsuitable for encryption, so originally we were doing a hackery thing to convert them into Curve, with the ed2curve library; and while that technically worked, it was too cumbersome too use and difficult to explain to people. So we changed that to generate instead an independent encryption keypair, saved to localstorage, with simple encryption with a password.
 
-**IMPORTANT**: For added safety, generate a new wallet to use with this app, since you'll have to copy your private key. It is not transmitted, just used locally to encrypt/decrypt. Maybe in a future version we'll add a more robust system to handle this issue.
+**IMPORTANT**: For added safety, generate a new wallet to use with this app. 
 
 See the [detailed instructions](instructions.md) on how to use, if you want.   
 
 The program is available on DEVNET at: UfQzdDXyS6huk6DTDKvvM5pTK2VtWQVmaGiNJ5qTJmo   
 Send me messages at: Ak1bE6EzNnChB3UJTD11Yu84Y9LxLca5Qqsb7hbQBkcT.  
+
+## Change Log
+
+v.0.1.1 Dropped the ed2curve conversion; during tests it became obvious that extracting the key and pasting it was too cumbersome; so now each sender has its own encryption pair, separate from the Solana address, stored in LocalStorage, with the key encrypted with a password.  
+
+v.0.1.0 Initial release. 
 
 ## Gallery
 

@@ -32,7 +32,9 @@ function Main() {
 
   useEffect(() => {
 	setIsClient(true);
-  }, []);
+	// Test encryption functionality
+	test();
+  }, [isClient]);
 
   const [receivedMessages, setReceivedMessages] = useState([
     {
