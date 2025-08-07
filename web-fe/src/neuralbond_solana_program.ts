@@ -143,6 +143,15 @@ export type NeuralbondSolanaProgram = {
         {
           "name": "price",
           "type": "u64"
+        },
+        {
+          "name": "encryptionPubkey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         }
       ]
     },
@@ -335,6 +344,13 @@ export type NeuralbondSolanaProgram = {
         "kind": "struct",
         "fields": [
           {
+            "name": "price",
+            "docs": [
+              "The price in lamports to send a message to this user"
+            ],
+            "type": "u64"
+          },
+          {
             "name": "receiver",
             "docs": [
               "The receiver of the message"
@@ -342,11 +358,16 @@ export type NeuralbondSolanaProgram = {
             "type": "pubkey"
           },
           {
-            "name": "price",
+            "name": "encryptionPubkey",
             "docs": [
-              "The price in lamports to send a message to this user"
+              "The encryption pubkey of the receiver"
             ],
-            "type": "u64"
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }

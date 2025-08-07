@@ -137,6 +137,15 @@
         {
           "name": "price",
           "type": "u64"
+        },
+        {
+          "name": "encryption_pubkey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         }
       ]
     },
@@ -329,6 +338,13 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "price",
+            "docs": [
+              "The price in lamports to send a message to this user"
+            ],
+            "type": "u64"
+          },
+          {
             "name": "receiver",
             "docs": [
               "The receiver of the message"
@@ -336,11 +352,16 @@
             "type": "pubkey"
           },
           {
-            "name": "price",
+            "name": "encryption_pubkey",
             "docs": [
-              "The price in lamports to send a message to this user"
+              "The encryption pubkey of the receiver"
             ],
-            "type": "u64"
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }

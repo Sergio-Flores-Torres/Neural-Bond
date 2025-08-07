@@ -37,7 +37,7 @@ function Main() {
   useEffect(() => {
 	setIsClient(true);
 	// Test encryption functionality
-	test();
+	//test();
   }, [isClient]);
 
   const [receivedMessages, setReceivedMessages] = useState([
@@ -61,14 +61,14 @@ function Main() {
 			throw new Error('Password is required to generate or retrieve encryption key');
 		}
 
-		let data = localStorage.getItem('keyPair');
+		let data = localStorage.getItem(window.solana.address);
 		if (!data) {
 			const localKeyPair = generateKeyPair();
 
 			// Encrypt
 			const encryptedKey = encryptString(encodeBase64(localKeyPair.secretKey), passwordUnlock);
 
-			localStorage.setItem('keyPair', JSON.stringify({
+			localStorage.setItem(window.solana.address, JSON.stringify({
 				publicKey: encodeBase64(localKeyPair.publicKey),
 				secretKey: encryptedKey
 			}));
@@ -97,16 +97,37 @@ function Main() {
     setIsLoading(true);
     try {
 		const { solana } = window;
-		let localKeyPair = getOrCreateEncryptionKey();
 
 		if (solana && solana.isPhantom && solana.isConnected) {
 			console.log('Phantom wallet connected!');
+			let localKeyPair = getOrCreateEncryptionKey();
 
 			const provider = new AnchorProvider(connection, wallet!, {commitment: 'confirmed'});
 			setProvider(provider);
 			// we can also explicitly mention the provider
 			const program = new Program(idl as NeuralbondSolanaProgram, provider);	
-			const encrypted_message = encryptMessage(message, base58_to_binary(address), localKeyPair.secretKey);
+
+			let [destMsgPDAAddress, _msgPDABump] = web3.PublicKey.findProgramAddressSync(
+				[Buffer.from("neuralbondmessage", 'utf-8'), wallet!.publicKey.toBuffer(), base58_to_binary(address)],
+				program.programId
+			)
+			let destMsg;
+			try {
+				destMsg = await program.account.message.fetch(destMsgPDAAddress);
+			} catch {
+				console.log('No existing message found, good to proceed.');
+			}
+
+			if (destMsg) {
+				throw new Error('A message to this address already exists. The program currently supports only one message per sender-receiver pair. The receiver must delete the existing message before sending a new one.');
+			}
+
+			let [destConfigPDAAddress, _destConfigPDABump] = web3.PublicKey.findProgramAddressSync(
+				[Buffer.from("neuralbondmessageconfig", 'utf-8'), base58_to_binary(address)],
+				program.programId
+			);
+			const destConfigAccount = await program.account.messageConfig.fetch(destConfigPDAAddress);			
+			const encrypted_message = encryptMessage(message, encodeBase64(new Uint8Array(destConfigAccount.encryptionPubkey)), localKeyPair.secretKey);
 
 			const tx = await program.methods.sendMessage(encrypted_message)
 				.accounts({
@@ -135,40 +156,75 @@ function Main() {
 
   // Placeholder function to fetch received messages
   const fetchReceivedMessages = async () => {
-	const provider = new AnchorProvider(connection, wallet!, {});
-	setProvider(provider);
+		const { solana } = window;
 
-	// we can also explicitly mention the provider
-	const program = new Program(idl as NeuralbondSolanaProgram, provider);
+		if (solana && solana.isPhantom && solana.isConnected) {
+			console.log('Phantom wallet connected!');
 
- 	const accounts = await connection.getParsedProgramAccounts(
-    new web3.PublicKey(program.programId),
-    {
-      filters: [
-        {
-          memcmp: {
-            offset: 8, // number of bytes
-            bytes: wallet!.publicKey.toBase58()
-          },
-        },
-      ],
-    });
-	let messages = [];
-	for (let i = 0; i < accounts.length; i++) {
-		try {
-			const account = await program.account.message.fetch(accounts[i].pubkey);	
-			let msg = decryptMessage(account.encryptedMessage, base58_to_binary(account.sender.toBase58()), base58_to_binary(encryptionKey));
-			messages.push({
-				id: accounts[i].pubkey.toBase58(),
-				content: msg,
-				senderAddress: account.sender.toBase58(),
-				timestamp: (new BN(account.createdAt) * 1000)
-			});		
-		} catch (error) {	
-			console.error('Failed-fetch/invalid account:', error);
+			try {
+				let localKeyPair = getOrCreateEncryptionKey();
+
+				const provider = new AnchorProvider(connection, wallet!, {});
+				setProvider(provider);
+
+				// we can also explicitly mention the provider
+				const program = new Program(idl as NeuralbondSolanaProgram, provider);
+
+				const accounts = await connection.getParsedProgramAccounts(
+				new web3.PublicKey(program.programId),
+				{
+				filters: [
+					{
+					memcmp: {
+						offset: 8, // number of bytes
+						bytes: wallet!.publicKey.toBase58()
+					},
+					},
+				],
+				});
+				let messages = [];
+				for (let i = 0; i < accounts.length; i++) {
+					console.log('Fetching message for account:', accounts[i].pubkey.toBase58());
+					try {
+						const account = await program.account.message.fetch(accounts[i].pubkey);	
+						console.log('Raw account data:', account);
+
+						let [senderConfigPDAAddress, _senderConfigPDABump] = web3.PublicKey.findProgramAddressSync(
+							[Buffer.from("neuralbondmessageconfig", 'utf-8'), account.sender.toBuffer()],
+							program.programId
+						);
+						console.log('Derived sender config PDA:', senderConfigPDAAddress.toBase58());
+						const senderConfigAccount = await program.account.messageConfig.fetch(senderConfigPDAAddress);			
+
+						let msg = decryptMessage(account.encryptedMessage, encodeBase64(new Uint8Array(senderConfigAccount.encryptionPubkey)), localKeyPair.secretKey);
+						messages.push({
+							id: accounts[i].pubkey.toBase58(),
+							content: msg,
+							senderAddress: account.sender.toBase58(),
+							timestamp: (new BN(account.createdAt) * 1000)
+						});		
+					} catch (error) {	
+						console.error('Failed-fetch/invalid account:', error);
+						messages.push({
+							id: accounts[i].pubkey.toBase58(),
+							content: "Unreadable message 0xdecafcoffee",
+							senderAddress: "Unknown",
+							timestamp: (new BN(Date.now()))
+						});						
+					}
+				}
+				setReceivedMessages(messages);
+
+			} catch (error) {
+				console.error('Failed to fetch messages:', error);	
+				alert('Failed to fetch messages:' + error);
+			}
+
+		} else {
+			console.log('Phantom wallet not connected...');
+			alert('Please connect your Phantom wallet first.');
 		}
-	}
-	setReceivedMessages(messages);
+
   };
 
   // Placeholder function to save configuration
@@ -180,6 +236,7 @@ function Main() {
 
 		if (solana && solana.isPhantom && solana.isConnected) {
 			console.log('Phantom wallet connected!');
+			let localKeyPair = getOrCreateEncryptionKey();
 
 			const provider = new AnchorProvider(connection, wallet!, {commitment: 'confirmed'});
 			setProvider(provider);
@@ -187,7 +244,10 @@ function Main() {
 			const program = new Program(idl as NeuralbondSolanaProgram, provider);	
 
 			try {
-				const tx = await program.methods.saveMessageConfig(new BN(parseFloat(messagePrice) * web3.LAMPORTS_PER_SOL))
+				const tx = await program.methods.saveMessageConfig(
+						new BN(parseFloat(messagePrice) * web3.LAMPORTS_PER_SOL),
+						Array.from(decodeBase64(localKeyPair.publicKey))
+					)
 					.accounts({
 					})
 					.rpc();
@@ -196,15 +256,16 @@ function Main() {
 			} catch (error) {	
 				alert(error)
 			}
+		      setLastConfigSaved(new Date().toLocaleTimeString());
 
 		} else {
 			console.log('Phantom wallet not connected...');
 			alert('Please connect your Phantom wallet first.');
 		}
       
-      setLastConfigSaved(new Date().toLocaleTimeString());
     } catch (error) {
       console.error('Failed to save configuration:', error);
+	  alert(error);
     } finally {
       setIsSavingConfig(false);
     }
@@ -252,7 +313,7 @@ function Main() {
     return `${address.slice(0, 8)}...${address.slice(-8)}`;
   };
   const isValidForm = message.trim().length > 0 && address.trim().length > 0;
-  const isValidFormWithKey = isValidForm && encryptionKey.trim().length > 0;
+  const isValidFormWithKey = isValidForm && passwordUnlock.trim().length > 0;
   const isValidPrice = messagePrice.trim().length > 0 && !isNaN(parseFloat(messagePrice)) && parseFloat(messagePrice) >= 0;
 
   return (
@@ -293,7 +354,7 @@ function Main() {
             <div className="mt-8 space-y-2">
               <div className="flex items-center text-xs text-gray-500">
                 <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 flex-shrink-0"></div>
-                <span>Generate a new wallet on Phantom and paste your private key</span>
+                <span>Generate a new wallet on Phantom and set your unlock password</span>
               </div>
               <div className="flex items-center text-xs text-gray-500">
                 <div className="w-2 h-2 bg-pink-400 rounded-full mr-3 flex-shrink-0"></div>
@@ -603,7 +664,7 @@ function Main() {
               
               <div className="text-xs text-gray-500 space-y-1">
 
-                <p>© 2025 Neural Bond v0.1.0 by <a href="https://saft.industries" className="text-cyan-400 hover:underline">SAFT.Industries</a>. Some rights reserved.</p>
+                <p>© 2025 Neural Bond v0.1.1 by <a href="https://saft.industries" className="text-cyan-400 hover:underline">SAFT.Industries</a>. Some rights reserved.</p>
 				<br/>
 				<p>Star us on Github && Send us business on Linkedin</p>
                 <p className="flex items-center justify-center space-x-2">
