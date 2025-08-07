@@ -346,7 +346,10 @@ function Main() {
               </h1>
             </div>
 
-            <p className="text-gray-400 text-sm">Possibly totally unsafe Solana messaging protocol by SAFT.Industries <br/> PoC - DEVNET version</p>
+            <p className="text-gray-400 text-sm">Possibly totally unsafe Solana messaging protocol by SAFT.Industries 
+				<br/> PoC - DEVNET version
+				<br/><br/><span>Devnet may show false sim err; check the prog txs on solscan: UfQzdDXyS6huk6DTDKvvM5pTK2VtWQVmaGiNJ5qTJmo</span>
+				</p>
 			<br/>
            {isClient && <WalletMultiButton />}
 
