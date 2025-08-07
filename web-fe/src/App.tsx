@@ -368,6 +368,10 @@ function Main() {
                 <div className="w-2 h-2 bg-yellow-400 rounded-full mr-3 flex-shrink-0"></div>
                 <span>See github for detailed instructions and videos</span>
               </div>
+              <div className="flex items-center text-xs text-gray-500">
+                <div className="w-2 h-2 bg-red-400 rounded-full mr-3 flex-shrink-0"></div>
+                <span>Send the devs a message at 9Uv1Bpzo9pb8mJkcPQBTgKXCBe69YPWsNSEuj3EJ76m1</span>
+              </div>
             </div>
           </div>
 

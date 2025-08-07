@@ -45,7 +45,7 @@ Note that, the ED keys use by Solana are unsuitable for encryption, so originall
 See the [detailed instructions](instructions.md) on how to use, if you want.   
 
 The program is available on DEVNET at: UfQzdDXyS6huk6DTDKvvM5pTK2VtWQVmaGiNJ5qTJmo   
-Send me messages at: Ak1bE6EzNnChB3UJTD11Yu84Y9LxLca5Qqsb7hbQBkcT.  
+Send me messages at: 9Uv1Bpzo9pb8mJkcPQBTgKXCBe69YPWsNSEuj3EJ76m1.  
 
 ## Change Log
 
